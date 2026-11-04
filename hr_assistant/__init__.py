@@ -1,4 +1,5 @@
 import os
+import shutil
 
 import chainlit as cl
 from config import Config
@@ -13,11 +14,29 @@ added, updated, removed = dp.process_documents(db)
 print(f"Document sync complete: {added} added, {updated} updated, {removed} removed")
 
 
+@cl.set_starters
+async def set_starters():
+    return [
+        cl.Starter(
+            label="Ricerca candidato",
+            message="Cercami un candidato che abbia le competenze di un saldatore",
+        ),
+    ]
+
+
 @cl.action_callback("db_stats")
 async def on_db_stats(action: cl.Action):
+    actions = [
+        cl.Action(
+            name="db_stats",
+            icon="mouse-pointer-click",
+            payload={"value": "db_stats"},
+            label="Ricalcola Statistiche Database",
+        ),
+    ]
     db_info = db.get_stats()
     response = await LLMHelper.get_db_stats(db_info)
-    await cl.Message(response).send()
+    await cl.Message(content=response, actions=actions).send()
 
 
 @cl.action_callback("db_reindex")
@@ -27,10 +46,11 @@ async def on_db_reindex(action: cl.Action):
     await cl.Message(message).send()
 
 
-@cl.action_callback("say_hello")
-async def on_say_hello(action: cl.Action):
-    valore = action.payload["value"]
-    await cl.Message(f"Hello {valore}").send()
+@cl.action_callback("db_remove")
+async def on_db_remove(action: cl.Action):
+    db.delete_collection()
+    message = "Il database e' stato completamente rimosso. E' necessario lanciare il reindex."
+    await cl.Message(message).send()
 
 
 @cl.on_chat_start
@@ -48,6 +68,12 @@ async def start():
             payload={"value": "db_reindex"},
             label="Reindex Database",
         ),
+        cl.Action(
+            name="db_remove",
+            icon="mouse-pointer-click",
+            payload={"value": "db_remove"},
+            label="Svuota completamente il Database",
+        ),
     ]
 
     await cl.Message(content="Informazioni del sistema:", actions=actions).send()
@@ -64,6 +90,24 @@ async def start():
             }
         ],
     )
+
+
+async def _process_and_index_file(file_path, file_name):
+    documents, metadatas, ids = dp.process_single_document(file_path)
+    if documents:
+        db.remove_document_by_source(file_name)
+        db.add_documents(documents, metadatas, ids)
+        return f"File '{file_name}' caricato e indicizzato con successo."
+    return f"Errore nel processare il file '{file_name}'."
+
+
+async def _file_upload(file):
+    file_name = os.path.basename(file.name)
+    dst_file_path = os.path.join(Config.DOCUMENTS_DIR, file_name)
+    os.makedirs(Config.DOCUMENTS_DIR, exist_ok=True)
+    shutil.move(file.path, dst_file_path)
+
+    return await _process_and_index_file(dst_file_path, file_name)
 
 
 async def rispondi(messages, prompt):
@@ -90,6 +134,26 @@ async def rispondi(messages, prompt):
 
 @cl.on_message
 async def handle_message(message: cl.Message):
+    if message.elements:
+        await cl.Message(content="Caricamento e indicizzazione documenti").send()
+
+        files = [
+            file
+            for file in message.elements
+            if file.name.lower().endswith(tuple(DocumentProcessor.SUPPORTED_EXTENSIONS))
+        ]
+
+        if files:
+            results = [await _file_upload(file) for file in files]
+        else:
+            results = ["Nessun file caricato"]
+
+        await cl.Message(content="\n".join(results)).send()
+        await cl.Message(content=f"Caricati {len(files)} file").send()
+
+        if not message.content.strip():
+            return
+
     user_question = message.content
     intent = LLMHelper.classify_intent(user_question)
     messages = cl.user_session.get("messages", [])

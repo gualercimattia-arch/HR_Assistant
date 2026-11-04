@@ -8,9 +8,16 @@ class Database:
         self.local_ef = CustomEmbeddingFunction()
 
         self.client = chromadb.PersistentClient(path=Config.PERSISTENT_DIR)
+        self._init_collection()
+
+    def _init_collection(self):
         self.collection = self.client.get_or_create_collection(
             name=Config.COLLECTION_NAME, embedding_function=self.local_ef
         )
+
+    def delete_collection(self):
+        self.client.delete_collection(Config.COLLECTION_NAME)
+        self._init_collection()
 
     def add_documents(self, documents, metadatas, ids):
         self.collection.add(documents=documents, metadatas=metadatas, ids=ids)

@@ -73,10 +73,15 @@ Così vengono elaborati solo i file cambiati e si evitano i duplicati.
 
 ## Pulsanti della chat
 
-All'apertura della chat sono disponibili due pulsanti:
+All'apertura della chat sono disponibili tre pulsanti:
 
 - **Statistiche Database**: descrive collezione, numero di frammenti e numero di file indicizzati.
 - **Reindex Database**: rilancia la sincronizzazione senza riavviare l'applicazione, utile dopo aver aggiunto o modificato un curriculum.
+- **Svuota completamente il Database**: elimina i frammenti indicizzati, non i file in `resumes/`. Con **Reindex Database** si ricrea tutto.
+
+## Caricamento di file dalla chat
+
+Uno o più file allegati a un messaggio vengono salvati in `resumes/` e indicizzati subito, se il formato è supportato. Un file con lo stesso nome sostituisce quello già presente. Se il messaggio contiene anche una domanda, l'assistente risponde dopo il caricamento.
 
 ## Intenzione dell'utente
 

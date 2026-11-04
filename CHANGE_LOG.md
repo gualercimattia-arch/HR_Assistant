@@ -28,3 +28,8 @@
 
 - lettura di file di tipo diverso con https://github.com/microsoft/markitdown
 - in semantic chunking aggiunta funzione _split_into_sentences per evitare che un file riporti una singola frase
+
+## 08 - Upload file da interfaccia
+
+- possibilita' di aggiungere uno o piu' file in resumes da interfaccia, e all'aggiunta, lanciare l'aggiornamento del database degli embeddings
+- nuova action per azzerare il database
