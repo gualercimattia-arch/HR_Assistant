@@ -51,7 +51,8 @@ class LLMHelper:
             Rispondi alla domanda dell'utente: [[[ {question}]]] .
             Spiega che nel file individuato c'e' il profilo piu' adatto. 
             Argomenta la scelta utilizzando il contenuto del testo individuato nel contesto.
-            Alla fine crea una sezione per i contatti del candidato indicando il nome, la sua email e il numero di telefono.
-            Dopo la sezione dei contatti indica il Nome del file del cv, non lo nominare mai prima di questa sezione.
+            Assicurati di indicare il nome del candidato.
+            Alla fine del tuo ragionamento, riporta le informazioni di contatto del candidato.
+            Assicurati di nominare il Nome dei file SOLO alla fine, mai nel mezzo del tuo ragionamento.
             Se non trovi corrispondenza in nessun cv non inventare.
         """

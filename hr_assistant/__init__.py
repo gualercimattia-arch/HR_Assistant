@@ -68,14 +68,14 @@ async def start():
 @cl.on_message
 async def handle_message(message: cl.Message):
     user_question = message.content
-    results = db.query(user_question, 3)
+    results = db.query(user_question)
 
     filename = results["metadatas"][0][0]["source"]
     candidate_info = DocumentProcessor.read_first_lines(
         os.path.join(Config.DOCUMENTS_DIR, filename), 10
     )
 
-    context = f"CONTESTO: nome file {filename} ecco il paragrafo piu' significativo: {results['documents'][0][0]}, qui trovi le informazioni del candidato: {candidate_info}"
+    context = f"CONTESTO: nome file {filename} ecco il paragrafo piu' significativo: {results['documents'][0][0]}, ecco la parte iniziale del file con le informazioni del candidato: {candidate_info}"
 
     prompt = LLMHelper.create_prompt(context, user_question)
 
