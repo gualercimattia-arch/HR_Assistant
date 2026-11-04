@@ -6,14 +6,14 @@ from database import Database
 from document_processor import DocumentProcessor
 from utils import LLMHelper
 
-documents, metadatas, ids = DocumentProcessor.process_documents()
-
 db = Database()
-db.add_documents(documents, metadatas, ids)
+
+added, updated, removed = DocumentProcessor.process_documents(db)
+print(f"Document sync complete: {added} added, {updated} updated, {removed} removed")
 
 
 @cl.on_chat_start
-def start():
+async def start():
     cl.user_session.set(
         "messages",
         [
@@ -35,7 +35,7 @@ async def handle_message(message: cl.Message):
 
     filename = results["metadatas"][0][0]["source"]
     context_lines = DocumentProcessor.read_first_lines(
-        os.path.join(Config.DOCUMENTS_DIR, filename), 10
+        os.path.join(Config.DOCUMENTS_DIR, filename), 200
     )
 
     context = f"CONTESTO: nome file {filename} ecco il paragrafo piu' significativo: {results['documents'][0][0]}"
