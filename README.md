@@ -14,16 +14,27 @@ poetry install
 copy .env.example .env
 ```
 
-Inserire la propria chiave OpenAI nel file `.env`: serve per gli embeddings (`text-embedding-3-small`).
+La chiave OpenAI nel file `.env` serve solo se si usa OpenAI. Con la configurazione predefinita tutto gira in locale: Ollama deve essere attivo con il modello `llama3.2` (`ollama pull llama3.2`).
 
-Per usare i modelli in locale con Ollama al posto di `gpt-4o-mini`, in `hr_assistant/config.py` sostituire `LLM_MODEL`, `AI_API_URL` e `AI_API_KEY` con i valori indicati nel commento (serve il modello `llama3.2`: `ollama pull llama3.2`).
+## Modelli intercambiabili
+
+In `hr_assistant/config.py`:
+
+| `EMBEDDING_PROVIDER` | `MODEL_NAME` | Note |
+|---|---|---|
+| `local` | `all-mpnet-base-v2` | SentenceTransformer, scaricato al primo avvio in `modelli/` |
+| `ollama` | `nomic-embed-text` | richiede `ollama pull nomic-embed-text` |
+| `openai` | `text-embedding-3-small` | richiede la chiave in `.env` |
+
+Per usare OpenAI anche per le risposte, sostituire `LLM_MODEL`, `LLM_MODEL_LOW`, `AI_API_URL` e `AI_API_KEY` con i valori nel commento.
 
 ## Struttura
 
 - `hr_assistant/config.py`: configurazione (cartelle, nomi dei modelli, chiavi lette da `.env`).
 - `hr_assistant/document_processor.py`: lettura dei curriculum e sincronizzazione con il database.
 - `hr_assistant/semantic_chunking.py`: divisione del testo in frammenti in base al significato.
-- `hr_assistant/database.py`: collection ChromaDB persistente in `data/chromadb` con embeddings OpenAI.
+- `hr_assistant/custom_embedding.py`: embedding con OpenAI, SentenceTransformer oppure Ollama.
+- `hr_assistant/database.py`: collection ChromaDB persistente in `data/chromadb`.
 - `hr_assistant/utils.py`: chiamate al modello di linguaggio (nome del candidato, prompt, risposta in streaming).
 - `hr_assistant/__init__.py`: applicazione Chainlit.
 
@@ -42,7 +53,7 @@ Il testo non viene più tagliato con un separatore fisso:
 1. viene diviso in frasi;
 2. ogni frase viene unita alla precedente e alla successiva, per darle contesto;
 3. si calcola l'embedding di ogni gruppo e la distanza coseno tra gruppi consecutivi;
-4. dove la distanza supera il 95° percentile il significato cambia, e lì inizia un nuovo frammento.
+4. dove la distanza supera il 70° percentile il significato cambia, e lì inizia un nuovo frammento.
 
 Se si cambia modello di embedding o tecnica di chunking bisogna cancellare `data/chromadb`: i vettori già salvati non sono compatibili e i file non cambiati non verrebbero rielaborati.
 

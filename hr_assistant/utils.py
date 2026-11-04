@@ -54,5 +54,6 @@ class LLMHelper:
             Assicurati di indicare il nome del candidato.
             Alla fine del tuo ragionamento, riporta le informazioni di contatto del candidato.
             Assicurati di nominare il Nome dei file SOLO alla fine, mai nel mezzo del tuo ragionamento.
+            Assicurati di usare correttamente la lingua italiana senza commettere errori.
             Se non trovi corrispondenza in nessun cv non inventare.
         """

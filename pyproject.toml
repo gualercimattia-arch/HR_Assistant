@@ -14,7 +14,9 @@ dependencies = [
     "ollama (>=0.6.3,<0.7.0)",
     "python-dotenv (>=1.2.4,<2.0.0)",
     "scikit-learn (>=1.9.1,<2.0.0)",
-    "langchain-openai (>=1.7.3,<2.0.0)"
+    "langchain-openai (>=1.7.3,<2.0.0)",
+    "torch (>=2.15.0,<3.0.0)",
+    "sentence-transformers (>=6.2.0,<7.0.0)"
 ]
 
 

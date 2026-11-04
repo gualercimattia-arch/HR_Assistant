@@ -41,7 +41,7 @@ class DocumentProcessor:
         ids = []
 
         with open(file_path, "r", encoding="utf-8") as file:
-            sc = SemanticChunking()
+            sc = SemanticChunking(70, 1)
             chunks = sc.chunk_text(file.read())
             file_metadata = DocumentProcessor.get_document_metadata(file_path)
 

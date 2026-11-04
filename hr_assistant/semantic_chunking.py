@@ -1,14 +1,13 @@
 import re
 
 import numpy as np
-from config import Config
-from langchain_openai import OpenAIEmbeddings
+from custom_embedding import CustomEmbeddingFunction
 from sklearn.metrics.pairwise import cosine_similarity
 
 
 class SemanticChunking:
     def __init__(self, breakpoint_percentile=95, buffer_size=1):
-        self.embeddings = OpenAIEmbeddings(openai_api_key=Config.OPENAI_KEY)
+        self.embedding_function = CustomEmbeddingFunction()
         self.breakpoint_percentile = breakpoint_percentile
         self.buffer_size = buffer_size
 
@@ -30,7 +29,7 @@ class SemanticChunking:
         return sentences
 
     def _calculate_distances(self, sentences):
-        embeddings = self.embeddings.embed_documents(
+        embeddings = self.embedding_function(
             [s["combined_sentence"] for s in sentences]
         )
 
