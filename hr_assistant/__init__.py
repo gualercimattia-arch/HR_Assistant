@@ -65,21 +65,7 @@ async def start():
     )
 
 
-@cl.on_message
-async def handle_message(message: cl.Message):
-    user_question = message.content
-    results = db.query(user_question)
-
-    filename = results["metadatas"][0][0]["source"]
-    candidate_info = DocumentProcessor.read_first_lines(
-        os.path.join(Config.DOCUMENTS_DIR, filename), 10
-    )
-
-    context = f"CONTESTO: nome file {filename} ecco il paragrafo piu' significativo: {results['documents'][0][0]}, ecco la parte iniziale del file con le informazioni del candidato: {candidate_info}"
-
-    prompt = LLMHelper.create_prompt(context, user_question)
-
-    messages = cl.user_session.get("messages", [])
+async def rispondi(messages, prompt):
     messages.append({"role": "user", "content": prompt})
 
     response_message = cl.Message(content="")
@@ -99,5 +85,61 @@ async def handle_message(message: cl.Message):
         error_message = f"Si è verificato un errore: {str(e)}"
         await cl.Message(content=error_message).send()
         print(error_message)
+
+
+@cl.on_message
+async def handle_message(message: cl.Message):
+    user_question = message.content
+    intent = LLMHelper.classify_intent(user_question)
+    messages = cl.user_session.get("messages", [])
+
+    if intent == "search_cv":
+        results = db.query(user_question)
+
+        if not results["documents"][0]:
+            error_message = (
+                "Nessun curriculum trovato per la tua richiesta.\n"
+                "- Prova con parole chiave più specifiche (es. 'developer Python senior')\n"
+                "- Invia una nuova richiesta con dettagli aggiuntivi\n"
+            )
+            await cl.Message(content=error_message).send()
+            return
+
+        filename = results["metadatas"][0][0]["source"]
+        context_lines = DocumentProcessor.read_first_lines(
+            os.path.join(Config.DOCUMENTS_DIR, filename), 20
+        )
+
+        context = (
+            f"Nome file: {filename}\n"
+            f"Estratto dal CV:\n"
+            f"```{results['documents'][0][0]}```"
+        )
+
+        prompt = LLMHelper.create_prompt(context, user_question, context_lines)
+        await rispondi(messages, prompt)
+
+        cl.user_session.set("last_cv_context", context)
+        cl.user_session.set("last_cv_header", context_lines)
+
+    elif intent == "info_cv":
+        context = cl.user_session.get("last_cv_context", "")
+        header = cl.user_session.get("last_cv_header", "")
+
+        if not context:
+            error_message = (
+                "Non ci sono CV recenti a cui fare riferimento.\n"
+                "Prova a cercare prima un candidato con una domanda come:\n"
+                "- 'Mostrami i candidati per sviluppatore Python'\n"
+                "- 'Chi ha esperienza con Kubernetes?'"
+            )
+            await cl.Message(content=error_message).send()
+            return
+
+        prompt = LLMHelper.create_prompt(context, user_question, header)
+        await rispondi(messages, prompt)
+
+    else:
+        await cl.Message(content="Non ho capito la tua richiesta. Puoi riformularla?").send()
 
     cl.user_session.set("messages", messages)

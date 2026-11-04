@@ -74,6 +74,13 @@ All'apertura della chat sono disponibili due pulsanti:
 - **Statistiche Database**: descrive collezione, numero di frammenti e numero di file indicizzati.
 - **Reindex Database**: rilancia la sincronizzazione senza riavviare l'applicazione, utile dopo aver aggiunto o modificato un curriculum.
 
+## Intenzione dell'utente
+
+Prima di rispondere, il modello classifica la domanda:
+
+- **`search_cv`**: l'utente cerca un candidato, quindi si interroga il database e il curriculum trovato resta in memoria nella sessione;
+- **`info_cv`**: l'utente chiede altro sul candidato già trovato (per esempio la sua email), quindi si riusa quel curriculum senza una nuova ricerca.
+
 ## Avvio
 
 ```powershell
