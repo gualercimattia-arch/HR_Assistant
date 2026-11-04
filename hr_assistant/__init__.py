@@ -36,21 +36,22 @@ async def on_db_stats(action: cl.Action):
     ]
     db_info = db.get_stats()
     response = await LLMHelper.get_db_stats(db_info)
-    await cl.Message(content=response, actions=actions).send()
+    await cl.Message(author="system_assistant", content=response, actions=actions).send()
 
 
 @cl.action_callback("db_reindex")
 async def on_db_reindex(action: cl.Action):
+    await cl.Message(author="system_assistant", content="reindicizzazione in corso ...").send()
     added, updated, removed = dp.process_documents(db)
     message = f"DB reindicizzato con successo. Document sync complete: {added} added, {updated} updated, {removed} removed"
-    await cl.Message(message).send()
+    await cl.Message(author="system_assistant", content=message).send()
 
 
 @cl.action_callback("db_remove")
 async def on_db_remove(action: cl.Action):
     db.delete_collection()
     message = "Il database e' stato completamente rimosso. E' necessario lanciare il reindex."
-    await cl.Message(message).send()
+    await cl.Message(author="system_assistant", content=message).send()
 
 
 @cl.on_chat_start
@@ -76,7 +77,7 @@ async def start():
         ),
     ]
 
-    await cl.Message(content="Informazioni del sistema:", actions=actions).send()
+    await cl.Message(author="system_assistant", content="Informazioni del sistema:", actions=actions).send()
 
     cl.user_session.set(
         "messages",
@@ -113,7 +114,7 @@ async def _file_upload(file):
 async def rispondi(messages, prompt):
     messages.append({"role": "user", "content": prompt})
 
-    response_message = cl.Message(content="")
+    response_message = cl.Message(author="hr_assistant", content="")
     await response_message.send()
 
     try:
@@ -128,14 +129,14 @@ async def rispondi(messages, prompt):
 
     except Exception as e:
         error_message = f"Si è verificato un errore: {str(e)}"
-        await cl.Message(content=error_message).send()
+        await cl.Message(author="hr_assistant", content=error_message).send()
         print(error_message)
 
 
 @cl.on_message
 async def handle_message(message: cl.Message):
     if message.elements:
-        await cl.Message(content="Caricamento e indicizzazione documenti").send()
+        await cl.Message(author="system_assistant", content="Caricamento e indicizzazione documenti").send()
 
         files = [
             file
@@ -148,8 +149,8 @@ async def handle_message(message: cl.Message):
         else:
             results = ["Nessun file caricato"]
 
-        await cl.Message(content="\n".join(results)).send()
-        await cl.Message(content=f"Caricati {len(files)} file").send()
+        await cl.Message(author="system_assistant", content="\n".join(results)).send()
+        await cl.Message(author="system_assistant", content=f"Caricati {len(files)} file").send()
 
         if not message.content.strip():
             return
@@ -167,7 +168,7 @@ async def handle_message(message: cl.Message):
                 "- Prova con parole chiave più specifiche (es. 'developer Python senior')\n"
                 "- Invia una nuova richiesta con dettagli aggiuntivi\n"
             )
-            await cl.Message(content=error_message).send()
+            await cl.Message(author="hr_assistant", content=error_message).send()
             return
 
         filename = results["metadatas"][0][0]["source"]
@@ -198,13 +199,13 @@ async def handle_message(message: cl.Message):
                 "- 'Mostrami i candidati per sviluppatore Python'\n"
                 "- 'Chi ha esperienza con Kubernetes?'"
             )
-            await cl.Message(content=error_message).send()
+            await cl.Message(author="hr_assistant", content=error_message).send()
             return
 
         prompt = LLMHelper.create_prompt(context, user_question, header)
         await rispondi(messages, prompt)
 
     else:
-        await cl.Message(content="Non ho capito la tua richiesta. Puoi riformularla?").send()
+        await cl.Message(author="hr_assistant", content="Non ho capito la tua richiesta. Puoi riformularla?").send()
 
     cl.user_session.set("messages", messages)

@@ -90,6 +90,13 @@ Prima di rispondere, il modello classifica la domanda:
 - **`search_cv`**: l'utente cerca un candidato, quindi si interroga il database e il curriculum trovato resta in memoria nella sessione;
 - **`info_cv`**: l'utente chiede altro sul candidato già trovato (per esempio la sua email), quindi si riusa quel curriculum senza una nuova ricerca.
 
+## Personalizzazione grafica
+
+- `public/theme.json`: colori del tema chiaro e scuro (`theme2.json` e `theme3.json` sono varianti: per usarne una, copiarla su `theme.json`).
+- `public/app.css`: CSS personalizzato, collegato in `.chainlit/config.toml`.
+- `public/logo_light.png`, `public/logo_dark.png`, `public/favicon.png`: logo e icona.
+- `public/avatars/`: un'immagine per ogni autore dei messaggi, con il nome di `author`: `hr_assistant` per le risposte, `system_assistant` per i messaggi di sistema.
+
 ## Avvio
 
 ```powershell
