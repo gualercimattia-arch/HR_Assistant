@@ -34,7 +34,7 @@ class LLMHelper:
                 {
                     "role": "user",
                     "content": f"""
-                      Il tuo compito è quello di descrivere in modo testuale, ma sintetico, le statistiche legate al database dei frammenti indicizzati da questo sistema. Dammi pure la percentuale di frammenti indicizzati rispetto al totale dei file presenti nel database. Ecco le informazioni necessarie per le statistiche da fornire: {context}
+                      Il tuo compito è quello di descrivere in modo testuale, ma sintetico, le statistiche legate al database dei frammenti indicizzati da questo sistema. Ecco le informazioni necessarie per le statistiche da fornire: {context}
                       """,
                 }
             ],

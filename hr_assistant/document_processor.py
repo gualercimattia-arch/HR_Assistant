@@ -3,6 +3,7 @@ import os
 import uuid
 
 from config import Config
+from semantic_chunking import SemanticChunking
 
 
 class DocumentProcessor:
@@ -40,7 +41,7 @@ class DocumentProcessor:
         ids = []
 
         with open(file_path, "r", encoding="utf-8") as file:
-            chunks = file.read().replace("\n", ".").split("### ")
+            chunks = SemanticChunking.chunk_it(file.read())
             file_metadata = DocumentProcessor.get_document_metadata(file_path)
 
             for chunk in chunks:
