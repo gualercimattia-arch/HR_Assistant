@@ -8,7 +8,8 @@ from utils import LLMHelper
 
 db = Database()
 
-added, updated, removed = DocumentProcessor.process_documents(db)
+dp = DocumentProcessor()
+added, updated, removed = dp.process_documents(db)
 print(f"Document sync complete: {added} added, {updated} updated, {removed} removed")
 
 
@@ -21,7 +22,7 @@ async def on_db_stats(action: cl.Action):
 
 @cl.action_callback("db_reindex")
 async def on_db_reindex(action: cl.Action):
-    added, updated, removed = DocumentProcessor.process_documents(db)
+    added, updated, removed = dp.process_documents(db)
     message = f"DB reindicizzato con successo. Document sync complete: {added} added, {updated} updated, {removed} removed"
     await cl.Message(message).send()
 
@@ -106,7 +107,7 @@ async def handle_message(message: cl.Message):
             return
 
         filename = results["metadatas"][0][0]["source"]
-        context_lines = DocumentProcessor.read_first_lines(
+        context_lines = dp.read_first_lines(
             os.path.join(Config.DOCUMENTS_DIR, filename), 20
         )
 

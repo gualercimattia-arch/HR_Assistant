@@ -14,8 +14,8 @@ class Config:
     EMBEDDING_PROVIDER = "local"
 
     # "text-embedding-3-small" per OpenAI, "nomic-embed-text" per Ollama
-    MODEL_NAME = "all-mpnet-base-v2"
-    MODEL_PATH = "modelli/mio_modello"
+    MODEL_NAME = "paraphrase-multilingual-mpnet-base-v2"
+    MODEL_PATH = "modelli/paraphrase-multilingual-mpnet-base-v2"
     OPENAI_EMBEDDINGS_KEY = os.environ.get("OPENAI_API_KEY", "")
 
     LLM_MODEL = "llama3.2"

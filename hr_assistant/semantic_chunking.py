@@ -11,11 +11,35 @@ class SemanticChunking:
         self.breakpoint_percentile = breakpoint_percentile
         self.buffer_size = buffer_size
 
+    def _split_into_sentences(self, text):
+        sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+
+        if len(sentences) == 1 and len(text) > 100:
+            parts = re.split(r"([.!?\n;:])", text.strip())
+
+            sentences = []
+            for i in range(0, len(parts) - 1, 2):
+                if parts[i].strip():
+                    sentences.append(parts[i].strip() + parts[i + 1])
+
+            if len(parts) % 2 == 1 and parts[-1].strip():
+                sentences.append(parts[-1].strip())
+
+            if len(sentences) == 1:
+                sentences = [s.strip() + "," for s in text.split(",") if s.strip()]
+                if sentences:
+                    sentences[-1] = sentences[-1][:-1] + "."
+
+        sentences = [s for s in sentences if s.strip()]
+        if not sentences:
+            sentences = [text]
+
+        return sentences
+
     def _process_sentences(self, text):
-        sentences = [
-            {"sentence": s, "index": i}
-            for i, s in enumerate(re.split(r"(?<=[.?!])\s+", text))
-        ]
+        raw_sentences = self._split_into_sentences(text)
+
+        sentences = [{"sentence": s, "index": i} for i, s in enumerate(raw_sentences)]
 
         for i, current in enumerate(sentences):
             context_range = range(

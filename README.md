@@ -22,7 +22,7 @@ In `hr_assistant/config.py`:
 
 | `EMBEDDING_PROVIDER` | `MODEL_NAME` | Note |
 |---|---|---|
-| `local` | `all-mpnet-base-v2` | SentenceTransformer, scaricato al primo avvio in `modelli/` |
+| `local` | `paraphrase-multilingual-mpnet-base-v2` | SentenceTransformer multilingua, adatto ai testi in italiano, scaricato al primo avvio in `modelli/` |
 | `ollama` | `nomic-embed-text` | richiede `ollama pull nomic-embed-text` |
 | `openai` | `text-embedding-3-small` | richiede la chiave in `.env` |
 
@@ -31,7 +31,7 @@ Per usare OpenAI anche per le risposte, sostituire `LLM_MODEL`, `LLM_MODEL_LOW`,
 ## Struttura
 
 - `hr_assistant/config.py`: configurazione (cartelle, nomi dei modelli, chiavi lette da `.env`).
-- `hr_assistant/document_processor.py`: lettura dei curriculum e sincronizzazione con il database.
+- `hr_assistant/document_processor.py`: lettura di documenti di diverso formato e sincronizzazione con il database.
 - `hr_assistant/semantic_chunking.py`: divisione del testo in frammenti in base al significato.
 - `hr_assistant/custom_embedding.py`: embedding con OpenAI, SentenceTransformer oppure Ollama.
 - `hr_assistant/database.py`: collection ChromaDB persistente in `data/chromadb`.
@@ -40,20 +40,24 @@ Per usare OpenAI anche per le risposte, sostituire `LLM_MODEL`, `LLM_MODEL_LOW`,
 
 ## Come funziona
 
-1. I curriculum in `resumes/` (solo file `.txt`) vengono divisi in frammenti con il chunking semantico.
+1. I curriculum in `resumes/` vengono convertiti in testo e divisi in frammenti con il chunking semantico.
 2. Ogni frammento viene trasformato in embedding e salvato in ChromaDB su disco, insieme a hash MD5 e data di modifica del file.
 3. Alla domanda dell'utente, ChromaDB restituisce il paragrafo più simile e il file da cui proviene.
 4. Le prime righe di quel file, che contengono i dati del candidato, vengono aggiunte al contesto: così basta una sola chiamata al modello.
 5. La risposta arriva in streaming nella chat e termina con i contatti del candidato e il nome del file.
+
+## Formati supportati
+
+I file vengono convertiti in testo con [MarkItDown](https://github.com/microsoft/markitdown): `.txt`, `.pdf`, `.doc`, `.docx`, `.ppt`, `.pptx`, `.xls`, `.xlsx`, `.html`, `.htm`, `.csv`, `.json`, `.xml` e `.zip` (vengono letti i file supportati contenuti nell'archivio).
 
 ## Chunking semantico
 
 Il testo non viene più tagliato con un separatore fisso:
 
 1. viene diviso in frasi;
-2. ogni frase viene unita alla precedente e alla successiva, per darle contesto;
+2. ogni frase viene unita alle tre precedenti e alle tre successive, per darle contesto;
 3. si calcola l'embedding di ogni gruppo e la distanza coseno tra gruppi consecutivi;
-4. dove la distanza supera il 70° percentile il significato cambia, e lì inizia un nuovo frammento.
+4. dove la distanza supera il 65° percentile il significato cambia, e lì inizia un nuovo frammento.
 
 Se si cambia modello di embedding o tecnica di chunking bisogna cancellare `data/chromadb`: i vettori già salvati non sono compatibili e i file non cambiati non verrebbero rielaborati.
 

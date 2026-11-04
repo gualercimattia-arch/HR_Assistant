@@ -23,3 +23,8 @@
 ## 06.2 User intent
 
 - Capire se l'utente sta cercando un CV o vuole sapere altre info su un cv già restituito
+
+## 07
+
+- lettura di file di tipo diverso con https://github.com/microsoft/markitdown
+- in semantic chunking aggiunta funzione _split_into_sentences per evitare che un file riporti una singola frase
