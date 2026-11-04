@@ -31,8 +31,8 @@ Per usare i modelli in locale con Ollama al posto di `gpt-4o-mini`, in `hr_assis
 1. I curriculum in `resumes/` (solo file `.txt`) vengono divisi in paragrafi usando `### ` come separatore.
 2. Ogni paragrafo viene trasformato in embedding e salvato in ChromaDB su disco, insieme a hash MD5 e data di modifica del file.
 3. Alla domanda dell'utente, ChromaDB restituisce il paragrafo più simile e il file da cui proviene.
-4. Dalle prime righe di quel file il modello estrae nome e cognome del candidato.
-5. Paragrafo, nome del file e nome del candidato vengono inseriti nel prompt e la risposta arriva in streaming nella chat.
+4. Le prime righe di quel file, che contengono i dati del candidato, vengono aggiunte al contesto: così basta una sola chiamata al modello.
+5. La risposta arriva in streaming nella chat e termina con i contatti del candidato e il nome del file.
 
 ## Sincronizzazione dei documenti
 
@@ -43,6 +43,13 @@ A ogni avvio i file in `resumes/` vengono confrontati con quelli tracciati nel d
 - **file eliminati**: i loro paragrafi vengono rimossi dal database.
 
 Così vengono elaborati solo i file cambiati e si evitano i duplicati.
+
+## Pulsanti della chat
+
+All'apertura della chat sono disponibili due pulsanti:
+
+- **Statistiche Database**: descrive collezione, numero di frammenti e numero di file indicizzati.
+- **Reindex Database**: rilancia la sincronizzazione senza riavviare l'applicazione, utile dopo aver aggiunto o modificato un curriculum.
 
 ## Avvio
 

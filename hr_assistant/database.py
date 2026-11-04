@@ -39,3 +39,14 @@ class Database:
         result = self.collection.get(where={"source": source})
         if result and result["ids"]:
             self.collection.delete(ids=result["ids"])
+
+    def get_stats(self):
+        result = self.collection.get()
+        valori_distinti = set(d["source"] for d in result["metadatas"])
+        numero_files = len(valori_distinti)
+
+        return f"""
+            Nome Collezione: {self.collection.name}
+            Numero totale Frammenti: {self.collection.count()}
+            Numero Files Elaborati: {numero_files}
+        """
